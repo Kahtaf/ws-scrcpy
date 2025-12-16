@@ -158,6 +158,8 @@ export class StreamClientScrcpy
             player: Util.parseString(params, 'player', true),
             udid: Util.parseString(params, 'udid', true),
             ws: Util.parseString(params, 'ws', true),
+            hideControls: Util.parseBooleanEnv(params.get('hideControls') || undefined) || false,
+            autoFullscreen: Util.parseBooleanEnv(params.get('autoFullscreen') || undefined) || false,
         };
     }
 
@@ -345,6 +347,23 @@ export class StreamClientScrcpy
         streamReceiver.on('displayInfo', this.onDisplayInfo);
         streamReceiver.on('disconnected', this.onDisconnected);
         console.log(TAG, player.getName(), udid);
+
+        // CUSTOM: Apply hide-controls mode if requested via URL param
+        const params = this.params as ParamsStreamScrcpy & { hideControls?: boolean; autoFullscreen?: boolean };
+        if (params.hideControls) {
+            document.body.classList.add('hide-controls');
+            console.log(TAG, 'Hide controls mode enabled');
+        }
+
+        // CUSTOM: Auto-fullscreen after stream starts (with a short delay for player init)
+        if (params.autoFullscreen) {
+            setTimeout(() => {
+                if (this.player) {
+                    console.log(TAG, 'Auto-entering fullscreen mode');
+                    this.player.openFullscreen(this);
+                }
+            }, 1000);
+        }
     }
 
     public sendMessage(message: ControlMessage): void {
