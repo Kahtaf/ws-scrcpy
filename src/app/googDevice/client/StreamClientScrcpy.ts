@@ -361,6 +361,17 @@ export class StreamClientScrcpy
         if (params.responsive) {
             document.body.classList.add('responsive-mode');
             console.log(TAG, 'Responsive mode enabled');
+            
+            // Clear inline styles on .video that get set by setScreenInfo
+            // This allows CSS !important rules to take effect
+            setTimeout(() => {
+                const videoDiv = document.querySelector('.video') as HTMLElement;
+                if (videoDiv) {
+                    videoDiv.style.width = '';
+                    videoDiv.style.height = '';
+                    console.log(TAG, 'Cleared inline styles from .video div');
+                }
+            }, 100);
         }
 
         // CUSTOM: Apply hide-controls mode
