@@ -504,7 +504,10 @@ export abstract class BasePlayer extends TypedEmitter<PlayerEvents> {
         const { width, height } = screenInfo.videoSize;
         this.touchableCanvas.width = width;
         this.touchableCanvas.height = height;
-        if (this.parentElement) {
+        
+        // In responsive mode, don't set fixed pixel sizes on parent - let CSS handle it
+        const isResponsive = document.body.classList.contains('responsive-mode');
+        if (this.parentElement && !isResponsive) {
             this.parentElement.style.height = `${height}px`;
             this.parentElement.style.width = `${width}px`;
         }
