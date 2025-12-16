@@ -159,6 +159,7 @@ export class StreamClientScrcpy
             udid: Util.parseString(params, 'udid', true),
             ws: Util.parseString(params, 'ws', true),
             hideControls: Util.parseBooleanEnv(params.get('hideControls') || undefined) || false,
+            responsive: Util.parseBooleanEnv(params.get('responsive') || undefined) || false,
         };
     }
 
@@ -347,13 +348,19 @@ export class StreamClientScrcpy
         streamReceiver.on('disconnected', this.onDisconnected);
         console.log(TAG, player.getName(), udid);
 
-        // CUSTOM: Enable keyboard capture by default if hideControls is requested
-        const params = this.params as ParamsStreamScrcpy & { hideControls?: boolean };
+        // CUSTOM: Enable keyboard capture and apply CSS classes for embedded modes
+        const params = this.params as ParamsStreamScrcpy & { hideControls?: boolean; responsive?: boolean };
         
         // Enable keyboard input capture by default when in embedded mode
-        if (params.hideControls) {
+        if (params.hideControls || params.responsive) {
             console.log(TAG, 'Enabling keyboard capture by default');
             this.setHandleKeyboardEvents(true);
+        }
+
+        // CUSTOM: Apply responsive mode for iframe embedding
+        if (params.responsive) {
+            document.body.classList.add('responsive-mode');
+            console.log(TAG, 'Responsive mode enabled');
         }
 
         // CUSTOM: Apply hide-controls mode

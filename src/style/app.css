@@ -223,3 +223,41 @@ body.fullscreen-mode:hover .control-buttons-list {
     opacity: 1;
 }
 
+/* Responsive mode - scales video/canvas to fit container */
+body.responsive-mode {
+    overflow: hidden;
+}
+
+body.responsive-mode .device-view {
+    width: 100%;
+    height: 100%;
+    float: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+body.responsive-mode .video {
+    width: 100%;
+    height: 100%;
+    float: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+body.responsive-mode .video-layer,
+body.responsive-mode .touch-layer {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+}
+
+/* Combine responsive + hide-controls for iframe embedding */
+body.responsive-mode.hide-controls .control-buttons-list {
+    display: none !important;
+}
+
