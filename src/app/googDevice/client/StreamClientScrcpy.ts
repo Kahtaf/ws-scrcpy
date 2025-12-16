@@ -361,20 +361,31 @@ export class StreamClientScrcpy
             console.log(TAG, 'Hide controls mode enabled');
         }
 
-        // CUSTOM: Auto-fullscreen is NOT possible without user gesture in browsers
-        // Instead, we just log a message - the user might need to click to fullscreen
+        // CUSTOM: Auto-fullscreen via CSS (browser fullscreen requires user gesture)
+        // This makes the video fill the entire viewport within the iframe
         if (params.autoFullscreen) {
-            console.log(TAG, 'Auto-fullscreen requested but requires user gesture');
-            // Try it anyway - some browsers/contexts might allow it
-            setTimeout(() => {
-                if (this.player) {
-                    console.log(TAG, 'Attempting fullscreen...');
-                    this.player.openFullscreen(this);
+            console.log(TAG, 'Applying fullscreen-like CSS styling');
+            document.body.classList.add('fullscreen-mode');
+            
+            // Apply inline styles to ensure video fills viewport
+            const applyFullscreenStyles = () => {
+                const deviceView = document.querySelector('.device-view') as HTMLElement;
+                const video = document.querySelector('.video') as HTMLElement;
+                
+                if (deviceView) {
+                    deviceView.style.cssText = 'width: 100vw !important; height: 100vh !important; float: none !important; position: fixed !important; top: 0 !important; left: 0 !important;';
                 }
-            }, 1000);
+                if (video) {
+                    video.style.cssText = 'width: 100vw !important; height: 100vh !important; max-width: 100vw !important; max-height: 100vh !important; object-fit: contain !important; float: none !important;';
+                }
+            };
+            
+            // Apply immediately and also on slight delay to handle async DOM updates
+            applyFullscreenStyles();
+            setTimeout(applyFullscreenStyles, 500);
+            setTimeout(applyFullscreenStyles, 1500);
         }
     }
-
     public sendMessage(message: ControlMessage): void {
         this.streamReceiver.sendEvent(message);
     }
