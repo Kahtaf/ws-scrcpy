@@ -159,7 +159,6 @@ export class StreamClientScrcpy
             udid: Util.parseString(params, 'udid', true),
             ws: Util.parseString(params, 'ws', true),
             hideControls: Util.parseBooleanEnv(params.get('hideControls') || undefined) || false,
-            autoFullscreen: Util.parseBooleanEnv(params.get('autoFullscreen') || undefined) || false,
         };
     }
 
@@ -348,30 +347,18 @@ export class StreamClientScrcpy
         streamReceiver.on('disconnected', this.onDisconnected);
         console.log(TAG, player.getName(), udid);
 
-        // CUSTOM: Enable keyboard capture by default if autoFullscreen is requested
-        const params = this.params as ParamsStreamScrcpy & { hideControls?: boolean; autoFullscreen?: boolean };
+        // CUSTOM: Enable keyboard capture by default if hideControls is requested
+        const params = this.params as ParamsStreamScrcpy & { hideControls?: boolean };
         
         // Enable keyboard input capture by default when in embedded mode
-        if (params.autoFullscreen || params.hideControls) {
+        if (params.hideControls) {
             console.log(TAG, 'Enabling keyboard capture by default');
             this.setHandleKeyboardEvents(true);
         }
 
-        // CUSTOM: Auto-fullscreen by invoking the player's fullscreen method
-        if (params.autoFullscreen) {
-            console.log(TAG, 'Triggering fullscreen mode');
-            // Small delay to ensure player is fully initialized
-            setTimeout(() => {
-                if (this.player) {
-                    console.log(TAG, 'Invoking player.openFullscreen');
-                    this.player.openFullscreen(this);
-                }
-            }, 500);
-        }
-
-        // CUSTOM: Apply hide-controls mode AFTER enabling fullscreen and keyboard
+        // CUSTOM: Apply hide-controls mode
         if (params.hideControls) {
-            // Delay hiding controls to allow fullscreen to be triggered first
+            // Delay hiding controls slightly to ensure DOM is ready
             setTimeout(() => {
                 const controlsList = document.querySelector('.control-buttons-list') as HTMLElement;
                 if (controlsList) {

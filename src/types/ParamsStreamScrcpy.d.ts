@@ -8,5 +8,4 @@ export interface ParamsStreamScrcpy extends ParamsStream {
     fitToScreen?: boolean;
     videoSettings?: VideoSettings;
     hideControls?: boolean;
-    autoFullscreen?: boolean;
 }
