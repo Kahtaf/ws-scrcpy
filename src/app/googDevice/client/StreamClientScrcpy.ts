@@ -348,42 +348,38 @@ export class StreamClientScrcpy
         streamReceiver.on('disconnected', this.onDisconnected);
         console.log(TAG, player.getName(), udid);
 
-        // CUSTOM: Apply hide-controls mode if requested via URL param
+        // CUSTOM: Enable keyboard capture by default if autoFullscreen is requested
         const params = this.params as ParamsStreamScrcpy & { hideControls?: boolean; autoFullscreen?: boolean };
-        if (params.hideControls) {
-            // Hide controls via JavaScript since CSS !important gets overridden
-            const controlsList = document.querySelector('.control-buttons-list') as HTMLElement;
-            if (controlsList) {
-                controlsList.style.setProperty('display', 'none', 'important');
-            }
-            // Also apply body class for other styling
-            document.body.classList.add('hide-controls');
-            console.log(TAG, 'Hide controls mode enabled');
+        
+        // Enable keyboard input capture by default when in embedded mode
+        if (params.autoFullscreen || params.hideControls) {
+            console.log(TAG, 'Enabling keyboard capture by default');
+            this.setHandleKeyboardEvents(true);
         }
 
-        // CUSTOM: Auto-fullscreen via CSS (browser fullscreen requires user gesture)
-        // This makes the video fill the entire viewport within the iframe
+        // CUSTOM: Auto-fullscreen by invoking the player's fullscreen method
         if (params.autoFullscreen) {
-            console.log(TAG, 'Applying fullscreen-like CSS styling');
-            document.body.classList.add('fullscreen-mode');
-            
-            // Apply inline styles to ensure video fills viewport
-            const applyFullscreenStyles = () => {
-                const deviceView = document.querySelector('.device-view') as HTMLElement;
-                const video = document.querySelector('.video') as HTMLElement;
-                
-                if (deviceView) {
-                    deviceView.style.cssText = 'width: 100vw !important; height: 100vh !important; float: none !important; position: fixed !important; top: 0 !important; left: 0 !important;';
+            console.log(TAG, 'Triggering fullscreen mode');
+            // Small delay to ensure player is fully initialized
+            setTimeout(() => {
+                if (this.player) {
+                    console.log(TAG, 'Invoking player.openFullscreen');
+                    this.player.openFullscreen(this);
                 }
-                if (video) {
-                    video.style.cssText = 'width: 100vw !important; height: 100vh !important; max-width: 100vw !important; max-height: 100vh !important; object-fit: contain !important; float: none !important;';
+            }, 500);
+        }
+
+        // CUSTOM: Apply hide-controls mode AFTER enabling fullscreen and keyboard
+        if (params.hideControls) {
+            // Delay hiding controls to allow fullscreen to be triggered first
+            setTimeout(() => {
+                const controlsList = document.querySelector('.control-buttons-list') as HTMLElement;
+                if (controlsList) {
+                    controlsList.style.setProperty('display', 'none', 'important');
                 }
-            };
-            
-            // Apply immediately and also on slight delay to handle async DOM updates
-            applyFullscreenStyles();
-            setTimeout(applyFullscreenStyles, 500);
-            setTimeout(applyFullscreenStyles, 1500);
+                document.body.classList.add('hide-controls');
+                console.log(TAG, 'Hide controls mode enabled');
+            }, 600);
         }
     }
     public sendMessage(message: ControlMessage): void {
