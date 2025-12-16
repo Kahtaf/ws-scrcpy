@@ -351,15 +351,24 @@ export class StreamClientScrcpy
         // CUSTOM: Apply hide-controls mode if requested via URL param
         const params = this.params as ParamsStreamScrcpy & { hideControls?: boolean; autoFullscreen?: boolean };
         if (params.hideControls) {
+            // Hide controls via JavaScript since CSS !important gets overridden
+            const controlsList = document.querySelector('.control-buttons-list') as HTMLElement;
+            if (controlsList) {
+                controlsList.style.setProperty('display', 'none', 'important');
+            }
+            // Also apply body class for other styling
             document.body.classList.add('hide-controls');
             console.log(TAG, 'Hide controls mode enabled');
         }
 
-        // CUSTOM: Auto-fullscreen after stream starts (with a short delay for player init)
+        // CUSTOM: Auto-fullscreen is NOT possible without user gesture in browsers
+        // Instead, we just log a message - the user might need to click to fullscreen
         if (params.autoFullscreen) {
+            console.log(TAG, 'Auto-fullscreen requested but requires user gesture');
+            // Try it anyway - some browsers/contexts might allow it
             setTimeout(() => {
                 if (this.player) {
-                    console.log(TAG, 'Auto-entering fullscreen mode');
+                    console.log(TAG, 'Attempting fullscreen...');
                     this.player.openFullscreen(this);
                 }
             }, 1000);
